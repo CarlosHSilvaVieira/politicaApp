@@ -1,0 +1,23 @@
+{
+  "name": "servidor",
+  "version": "1.0.0",
+  "description": "ti de bd",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [
+    "ti",
+    "bd"
+  ],
+  "author": "Carlos",
+  "license": "ISC",
+  "dependencies": {
+    "ajax-request": "^1.2.3",
+    "classifier": "^0.1.0",
+    "express": "^4.16.2",
+    "nodemon": "^1.12.1",
+    "sync-mysql": "^3.0.1"
+  }
+}
