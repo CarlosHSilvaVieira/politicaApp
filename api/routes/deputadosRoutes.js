@@ -7,6 +7,15 @@ module.exports = function (app)
   /*app.route('/deputado')
   .post(deputadosController.createDeputado);*/
 
+  app.route('/')
+  .get(helloWorld)
+  .post(helloWorld);
+
+  function helloWorld(req, res)
+  {
+    res.status(200).send("<html><head><title>API politicaApp</title></head><body><h1>API politicaApp</h1> <p> API de analise de sentimento de twitters sobre políticos brasileiros</p> <hr> <p>@CarlosHSilvaVieira</p></body></html>");
+  }
+
   app.route('/deputados')
   .get(deputadosController.getAllDeputados);
 
