@@ -1,4 +1,4 @@
-var model = require('../models/deputadosModel.js');
+var model = require('../models/senadoresModel.js');
 const http = require('ajax-request');
 
 var request = {
@@ -13,22 +13,22 @@ var request = {
    }
  };
 
-exports.getDeputado = function (req, res)
+exports.getSenador = function (req, res)
 {
-  var d = model.getDeputado(req.params.nomeDepuatdo);
+  var d = model.getSenador(req.params.nomeDepuatdo);
   res.send(200, d);
 }
 
-exports.getAllDeputados = function (req, res)
+exports.getAllSenadores = function (req, res)
 {
-  res.send(200, model.getDeputados());
+  res.send(200, model.getSenadores());
 }
 
 exports.analiseSentimeno = function (req, res)
 {
-  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo)[0].id;
+  var id_parlamentar = model.getSenador(req.params.nomeSenador)[0].id;
 
-  var tweets = model.getTweetsDeputado(id_parlamentar);
+  var tweets = model.getTweetsSenador(id_parlamentar);
 
   tweets.forEach(function(item, index)
   {
@@ -47,7 +47,7 @@ exports.analiseSentimeno = function (req, res)
 
 exports.getTweets = function (req, res)
 {
-  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo)[0].id;
-  var tweets = model.getTweetsDeputado(id_parlamentar);
+  var id_parlamentar = model.getSenador(req.params.nomeSenador)[0].id;
+  var tweets = model.getTweetsSenador(id_parlamentar);
   res.send(200, tweets);
 }

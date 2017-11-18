@@ -4,9 +4,6 @@ module.exports = function (app)
 {
   var deputadosController = require('../controllers/deputadosController.js');
 
-  /*app.route('/deputado')
-  .post(deputadosController.createDeputado);*/
-
   app.route('/')
   .get(helloWorld)
   .post(helloWorld);
@@ -27,9 +24,4 @@ module.exports = function (app)
 
   app.route('/deputado/:nomeDepuatdo')
   .get(deputadosController.getDeputado);
-
-  /*
-  .put(deputadosController.updateDeputado)
-  .delete(deputadosController.deleteDeputado);
-  */
 };
