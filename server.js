@@ -10,4 +10,7 @@ app.listen(port);
 var routes = require('./api/routes/deputadosRoutes.js');
 routes(app);
 
+var senadoresRoutes = require('./api/routes/senadoresRoutes.js')
+senadoresRoutes(app);
+
 console.log("API na porta "+ port);

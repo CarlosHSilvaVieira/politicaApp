@@ -10,7 +10,7 @@ module.exports.getDeputados = function ()
 
 module.exports.getDeputado = function(nome)
 {
-	var query = "select * from deputados where nome = '"+ nome + "'";
+	var query = "select * from deputados where nome = '"+ nome.toLowerCase() + "'";
 	var resultado = connection.query(query);
 	return resultado;
 }

@@ -26,28 +26,55 @@ exports.getAllDeputados = function (req, res)
 
 exports.analiseSentimeno = function (req, res)
 {
-  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo)[0].id;
+  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo);
 
-  var tweets = model.getTweetsDeputado(id_parlamentar);
-
-  tweets.forEach(function(item, index)
+  if(typeof id_parlamentar[0] !== "undefined")
   {
-    request.data.data.push({text: item.texto});
-  });
+    var tweets = model.getTweetsDeputado(id_parlamentar[0].id);
 
-  http.post(request, function(e, r, body)
+    if(typeof tweets[0] !== "undefined")
+    {
+      tweets.forEach(function(item, index)
+      {
+        request.data.data.push({text: item.texto});
+      });
+
+      http.post(request, function(e, r, body)
+      {
+        //se a requisição retornar um erro
+        if(e){res.send(500, {error: e});}
+
+        //se estiver tudo de boas
+        res.send(200, body);
+      });
+    }
+    else
+    {
+      res.send(200, {"texto": "deputado sem tweets"});
+    }
+  }
+  else
   {
-    //se a requisição retornar um erro
-    if(e){res.send(500, {error: e});}
-
-    //se estiver tudo de boas
-    res.send(200, body);
-  });
+    res.send(200, {"texto": "deputado não encontrado"});
+  }
 }
 
 exports.getTweets = function (req, res)
 {
-  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo)[0].id;
-  var tweets = model.getTweetsDeputado(id_parlamentar);
-  res.send(200, tweets);
+  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo);
+
+  if(typeof id_parlamentar[0] !== "undefined")
+  {
+    var tweets = model.getTweetsDeputado(id_parlamentar[0].id);
+    if(typeof tweets[0] !== "undefined")
+    {
+      res.send(200, tweets);
+    }
+    else {
+      res.send(200, {"data": "deputado sem tweets"});
+    }
+  }
+  else {
+    res.send(200, {"data": "deputado não encontrado"});
+  }
 }
