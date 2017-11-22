@@ -13,4 +13,7 @@ routes(app);
 var senadoresRoutes = require('./api/routes/senadoresRoutes.js')
 senadoresRoutes(app);
 
+var coletor = require('./api/routes/coletorRoutes.js');
+coletor(app);
+
 console.log("API na porta "+ port);

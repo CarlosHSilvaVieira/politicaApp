@@ -1,4 +1,4 @@
-var connection = require('./connection');
+var connection = require('./connectionAsync');
 var Twitter = require ('twitter');
 var https = require ('https');
 var processador = require('./processador/processador.js');
@@ -17,9 +17,26 @@ var client = new Twitter({
 module.exports.coletaTweetsSenador = function(nomeSenador)
 {
   var senador = senadoresModel.getSenador(nomeSenador);
-  if(senador != [])
+  if(senador !== [])
   {
-    getTweets(senador[0], 'senador');
+    getTweets(senador[0], 'senador', false, 'tweets_senadores');
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+module.exports.coletaTweetsSenadores = function()
+{
+  var senadores = senadoresModel.getSenadores();
+  if(senadores !== [])
+  {
+    senadores.forEach(function(senador, index)
+    {
+      getTweets(senador, 'senador', false, 'tweets_senadores');
+    });
     return true;
   }
   else
@@ -30,10 +47,12 @@ module.exports.coletaTweetsSenador = function(nomeSenador)
 
 module.exports.coletaTweetsDeputado = function(nomeDepuatdo)
 {
-  var deputado = deputadosModel.getSenador(nomeDepuatdo);
-  if(deputado != [])
+  var deputado = deputadosModel.getDeputado(nomeDepuatdo);
+  if(typeof deputado[0] !== 'undefined')
   {
-    getTweets(deputado[0], 'deputado');
+    getTweets(deputado[0], 'deputado', true, 'tweets_deputados');
+    getTweets(deputado[0], 'deputado', false, 'tweets_deputados');
+
     return true;
   }
   else
@@ -42,16 +61,40 @@ module.exports.coletaTweetsDeputado = function(nomeDepuatdo)
   }
 }
 
-function getTweets(parlamentar, cargo)
+module.exports.coletaTweetsDeputados = function()
+{
+  var deputados = deputadosModel.getDeputados();
+  if(typeof deputados[0] !== 'undefined')
+  {
+
+    deputados.forEach(function(deputado, index)
+    {
+      getTweets(deputado, 'deputado', false, 'tweets_deputados');
+    });
+
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+function getTweets(parlamentar, cargo, direcionado, tabela)
 {
   var count = 0;
-  var params = {q: '', result_type: 'mixed', lang: 'pt'}; //-filter:retweets -filter:links
-  params.q = cargo + ' ' + parlamentar.nome.toLowerCase().trim() + '';
+  var params = {q: '', count: 30, result_type: 'recent', lang: 'pt'}; //-filter:retweets -filter:links
+
+  if(direcionado == true){cargo = "to:";}
+
+  params.q = cargo + ' ' + parlamentar.nome.toLowerCase().trim() + ' -filter:retweets';
 
   client.get('search/tweets', params, function(error, tweets, response)
   {
     if (!error)
     {
+        console.log(tweets.statuses.length);
+
         tweets.statuses.forEach(function(tweet, index)
         {
           var texto = tweet.text;
@@ -59,12 +102,14 @@ function getTweets(parlamentar, cargo)
           texto = texto.replace(exp, "");
 
           var classificacao = processador.classify(texto);
-          processador.salvarParaTreino(texto, classificacao, 'learning');
+          classificacao = true;
+          //processador.salvarParaTreino(texto, classificacao, 'learning');
 
           if(classificacao == true)
           {
-            var query = "insert into tweets_deputados (id_parlamentar, texto) values  ("+parlamentar.id+ ", '"+texto+"');";
-            var result = connection.query(query);
+            var query = "insert into "+tabela+" (id_parlamentar, texto) values  ("+parlamentar.id+ ", '"+texto+"');";
+            console.log(query);
+            connection.query(query, function(err, responde){});
             count++;
           }
           else

@@ -4,9 +4,15 @@ module.exports = function (app)
 {
   var coletorController = require('../controllers/coletorController.js');
 
-  app.route('/senador/:nomeSenador')
+  app.route('/coletor/senadores')
+  .get(coletorController.coletaTweetsSenadores);
+
+  app.route('/coletor/deputados')
+  .get(coletorController.coletaTweetsDeputados);
+
+  app.route('/coletor/senador/:nomeSenador')
   .get(coletorController.coletaTweetsSenador);
 
-  app.route('/deputado/:nomeDeputado')
+  app.route('/coletor/deputado/:nomeDeputado')
   .get(coletorController.coletaTweetsDeputado);
 };

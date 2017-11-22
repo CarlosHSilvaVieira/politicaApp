@@ -26,9 +26,35 @@ exports.coletaTweetsSenador = function (req, res)
   }
 }
 
+exports.coletaTweetsSenadores = function (req, res)
+{
+  var d = model.coletaTweetsSenadores();
+  if(d == true)
+  {
+    res.send(200, {texto: "coleta realizada"});
+  }
+  else
+  {
+    res.send(200, {texto: "coleta não pode ser realizada"});
+  }
+}
+
+exports.coletaTweetsDeputados = function (req, res)
+{
+  var d = model.coletaTweetsDeputados();
+  if(d == true)
+  {
+    res.send(200, {texto: "coleta realizada"});
+  }
+  else
+  {
+    res.send(200, {texto: "coleta não pode ser realizada"});
+  }
+}
+
 exports.coletaTweetsDeputado = function (req, res)
 {
-  var d = model.coletaTweetsDeputado(req.params.nomeDepuatdo);
+  var d = model.coletaTweetsDeputado(req.params.nomeDeputado);
   if(d == true)
   {
     res.send(200, {texto: "coleta realizada"});
