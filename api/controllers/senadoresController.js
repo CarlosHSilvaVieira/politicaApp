@@ -7,7 +7,7 @@ var request = {
      "Accept" : "application/json",
      "Content-Type" : "application/json"
    },
-   body:
+   data:
    {
      language: "es",
      data: []
@@ -38,7 +38,7 @@ exports.analiseSentimeno = function (req, res)
     {
       tweets.forEach(function(item, index)
       {
-        request.body.data.push({text: item.texto});
+        request.data.data.push({text: item.texto});
       });
 
       http.post(request, function(e, r, body)
