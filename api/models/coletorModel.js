@@ -45,6 +45,19 @@ module.exports.coletaTweetsSenadores = function()
   }
 }
 
+module.exports.coletaTweetsSenadoresSemTweets = function()
+{
+  var senadores = senadoresModel.getSenadoresSemTweets();
+  if(senadores.length > 0)
+  {
+    senadores.forEach(function(senador, index)
+    {
+      getTweets(senador, 'senador', false, 'tweets_senadores');
+    });
+  }
+  return senadores.length;
+}
+
 module.exports.coletaTweetsDeputado = function(nomeDepuatdo)
 {
   var deputado = deputadosModel.getDeputado(nomeDepuatdo);
@@ -79,6 +92,21 @@ module.exports.coletaTweetsDeputados = function()
     return false;
   }
 }
+
+module.exports.coletaTweetsDeputadosSemTweets = function()
+{
+  var deputados = deputadosModel.getDeputadosSemTweets();
+  if(typeof deputados[0] !== 'undefined')
+  {
+
+    deputados.forEach(function(deputado, index)
+    {
+      getTweets(deputado, 'deputado', false, 'tweets_deputados');
+    });
+  }
+  return deputados.length;
+}
+
 
 function getTweets(parlamentar, cargo, direcionado, tabela)
 {

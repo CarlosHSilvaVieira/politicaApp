@@ -7,6 +7,13 @@ module.exports.getSenadores = function()
 	return resultado;
 }
 
+module.exports.getSenadoresSemTweets = function ()
+{
+	var query = "select * from senadores AS S left join tweets_senadores AS TS on (S.id = TS.id_parlamentar) where TS.id_parlamentar is null";
+	var resultado = connection.query(query);
+	return resultado;
+}
+
 module.exports.getSenador = function(nome)
 {
 	var query = "select * from senadores where nome = '"+ nome + "'";

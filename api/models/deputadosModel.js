@@ -8,6 +8,13 @@ module.exports.getDeputados = function ()
 	return resultado;
 }
 
+module.exports.getDeputadosSemTweets = function()
+{
+	var query = "select * from deputados AS D left join tweets_deputados AS TD on (D.id = TD.id_parlamentar) where TD.id_parlamentar is null";
+	var resultado = connection.query(query);
+	return resultado;
+}
+
 module.exports.getDeputado = function(nome)
 {
 	var query = "select * from deputados where nome = '"+ nome.toLowerCase() + "'";

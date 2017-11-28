@@ -65,6 +65,32 @@ exports.coletaTweetsDeputado = function (req, res)
   }
 }
 
+exports.coletaTweetsDeputadosSemTweets = function(req, res)
+{
+  var d = model.coletaTweetsDeputadosSemTweets();
+  if(d > 0)
+  {
+    res.send(200, {texto: "coleta realizada " + d + " deputados ainda sem tweets"});
+  }
+  else
+  {
+    res.send(200, {texto: "coleta não pode ser realizada"});
+  }
+}
+
+exports.coletaTweetsSenadoresSemTweets = function(req, res)
+{
+  var d = model.coletaTweetsSenadoresSemTweets();
+  if(d > 0)
+  {
+    res.send(200, {texto: "coleta realizada " + d + " senadores ainda sem tweets"});
+  }
+  else
+  {
+    res.send(200, {texto: "coleta não pode ser realizada"});
+  }
+}
+
 exports.analiseSentimeno = function (req, res)
 {
   var id_parlamentar = model.getSenador(req.params.nomeSenador)[0].id;

@@ -7,8 +7,14 @@ module.exports = function (app)
   app.route('/coletor/senadores')
   .get(coletorController.coletaTweetsSenadores);
 
+  app.route('/coletor/senadores/sem')
+  .get(coletorController.coletaTweetsSenadoresSemTweets);
+
   app.route('/coletor/deputados')
   .get(coletorController.coletaTweetsDeputados);
+
+  app.route('/coletor/deputados/sem')
+  .get(coletorController.coletaTweetsDeputadosSemTweets);
 
   app.route('/coletor/senador/:nomeSenador')
   .get(coletorController.coletaTweetsSenador);
