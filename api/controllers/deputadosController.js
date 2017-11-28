@@ -72,7 +72,7 @@ exports.analiseSentimeno = function (req, res)
         resposta.porcentagem_neutros = (resposta.neutros * 100) / resposta.total;
 
         //se estiver tudo de boas
-        res.status(200).send(JSON.stringify(serverResponse));
+        res.status(200).send(JSON.stringify(resposta));
       });
     }
     else
