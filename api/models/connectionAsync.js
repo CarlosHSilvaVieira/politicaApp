@@ -3,11 +3,11 @@ var mysql = require('mysql');
 function conectar()
 {
 	var con = mysql.createConnection({
-		host: "localhost",
+		host: "us-cdbr-azure-southcentral-f.cloudapp.net",
 		port: 3306,
-		user: "root",
-		password: "",
-		database: "ti_bd"
+		user: "be59789822ac80",
+		password: "f98668a2",
+		database: "mydb"
 	});
 
 	return con;
