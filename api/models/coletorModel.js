@@ -48,7 +48,7 @@ module.exports.coletaTweetsSenadores = function()
 module.exports.coletaTweetsSenadoresSemTweets = function()
 {
   var senadores = senadoresModel.getSenadoresSemTweets();
-  if(senadores.length > 0)
+  if(typeof senadores[0] !== 'undefined')
   {
     senadores.forEach(function(senador, index)
     {
