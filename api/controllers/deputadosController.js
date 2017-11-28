@@ -58,11 +58,11 @@ exports.analiseSentimeno = function (req, res)
           }
           else if(item.polarity == 2)
           {
-            resposta.negativos++;
+            resposta.neutros++;
           }
           else
           {
-            resposta.neutros++;
+            resposta.negativos++;
           }
 
         });

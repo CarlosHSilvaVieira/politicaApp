@@ -4,11 +4,11 @@ var connection;
 function conectar()
 {
 	var con = new mysql({
-		host: "us-cdbr-azure-southcentral-f.cloudapp.net",
+		host: "localhost",
 		port: 3306,
-		user: "be59789822ac80",
-		password: "f98668a2",
-		database: "mydb"
+		user: "root",
+		password: "",
+		database: "ti_bd"
 	});
 
 	return con;
