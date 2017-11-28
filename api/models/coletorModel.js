@@ -130,8 +130,7 @@ function getTweets(parlamentar, cargo, direcionado, tabela)
           texto = texto.replace(exp, "");
 
           var classificacao = processador.classify(texto);
-          classificacao = true;
-          //processador.salvarParaTreino(texto, classificacao, 'learning');
+          processador.salvarParaTreino(texto, classificacao, 'learning');
 
           if(classificacao == true)
           {
