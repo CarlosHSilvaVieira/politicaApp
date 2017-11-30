@@ -104,10 +104,8 @@ exports.coletaTweetsSenadoresSemTweets = function(req, res)
   }
 }
 
-async function analiseSentimeno (texto)
+async function analiseSentimeno (tabela, id, texto)
 {
-  var retorno = -1;
-
   if(typeof texto !== "undefined")
   {
     var a = await traduzir('pt', 'en', texto)
@@ -126,16 +124,17 @@ async function analiseSentimeno (texto)
     http.post(request, function(e, r, body)
     {
       //se a requisição retornar um erro
-      if(e){return 0;}
-      getPolaridade(JSON.parse(body).data[0].polarity);
+      if(e){return e;}
+      salvar(tabela, id, texto, JSON.parse(body).data[0].polarity);
     });
   }
-  console.log(retorno);
-  return retorno;
 }
 
-function getPolaridade(polarity) {
-  return polarity;
+function salvar(id, tabela, texto, polarity)
+{
+  var query = "insert into "+tabela+" (id_parlamentar, texto, polarity) values  ("+id+ ", '"+texto+"', "+polarity+");";
+  console.log(query);
+  connection.query(query, function(err, responde){});
 }
 
 async function traduzir(origem, destino, texto)
@@ -172,11 +171,7 @@ function getTweets(parlamentar, cargo, direcionado, tabela)
 
             if(classificacao == true)
             {
-              var sentiment = analiseSentimeno(texto);
-              console.log(sentiment);
-              var query = "insert into "+tabela+" (id_parlamentar, texto, polarity) values  ("+parlamentar.id+ ", '"+texto+"', "+sentiment.data.polarity+");";
-              console.log(query);
-              connection.query(query, function(err, responde){});
+              analiseSentimeno(tabela, parlamentar.id, texto);
             }
             else
             {
