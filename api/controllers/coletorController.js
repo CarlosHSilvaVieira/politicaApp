@@ -56,7 +56,7 @@ exports.coletaTweetsDeputados = function (req, res)
   {
     deputados.forEach(function (item, index)
     {
-      getTweets(item, 'deputado', 'tweets_deputados');
+      getTweets(item, "deputado", "tweets_deputados");
     });
     res.status(200).send({"status": "200", "data": "coleta realizada"});
   }
@@ -85,9 +85,9 @@ exports.coletaTweetsDeputadosSemTweets = function(req, res)
   var deputados = deputadosModel.getDeputadosSemTweets();
   if(deputados.length > 0)
   {
-    deputados.forEach(function (deputado, index)
+    deputados.forEach(function (item, index)
     {
-      getTweets(deputado, "deputado", "tweets_deputados");
+      getTweets(item, "deputado", "tweets_deputados");
     });
 
     res.status(200).send({"status": "200", "texto": "coleta realizada " + deputados.length + " deputados ainda sem tweets"});
@@ -103,9 +103,9 @@ exports.coletaTweetsSenadoresSemTweets = function(req, res)
   var senadores = senadoresModel.getSenadoresSemTweets();
   if(senadores.length > 0)
   {
-    senadores.forEach(function (senador, index)
+    senadores.forEach(function (item, index)
     {
-      getTweets(senador, "senador", "tweets_senadores");
+      getTweets(item, "senador", "tweets_senadores");
     });
     res.status(200).send({"status": "200", "texto": "coleta realizada " + senadores.length + " deputados ainda sem tweets"});
   }
@@ -128,23 +128,19 @@ async function analiseSentimeno (tabela, id, texto)
      };
 
     var texto_traduzido = await traduzir('pt', 'en', texto);
+    request.data = {data: []};
+    request.data.data.push({text: texto_traduzido});
 
-    if(texto_traduzido !== "")
+    //var classificacao = processador.classify(texto);
+    //processador.salvarParaTreino(texto, classificacao, 'learning');
+    console.log(request.data.data);
+    http.post(request, function(e, r, body)
     {
-      request.data = {data: []};
-      request.data.data.push({text: texto_traduzido});
-
-      //var classificacao = processador.classify(texto);
-      //processador.salvarParaTreino(texto, classificacao, 'learning');
-      console.log(request.data.data);
-      http.post(request, function(e, r, body)
-      {
-        //se a requisição retornar um erro
-        if(e){return e;}
-        //senão
-        salvar(tabela, id, texto_traduzido, JSON.parse(body).data[0].polarity);
-      });
-    }
+      //se a requisição retornar um erro
+      if(e){return e;}
+      //senão
+      salvar(tabela, id, texto_traduzido, JSON.parse(body).data[0].polarity);
+    });
   }
 }
 
@@ -156,12 +152,11 @@ async function salvar(tabela, id, texto, polarity)
 
 async function traduzir(origem, destino, texto)
 {
-   var resultado = "";
-   resultado = await translate(texto, {from: origem, to: destino});
+   var resultado = await translate(texto, {from: origem, to: destino});
    return resultado;
 }
 
-async function getTweets(parlamentar, cargo, tabela)
+function getTweets(parlamentar, cargo, tabela)
 {
   var count = 0;
   var params = {q: '', count: 30, result_type: 'recent', lang: 'pt'};
@@ -184,10 +179,7 @@ async function getTweets(parlamentar, cargo, tabela)
     }
     else
     {
-      console.log("Limite de requisiões excedido execucão re-agendada para daqui a dez minutos");
-      setTimeout(function () {
-        getTweets(parlamentar, cargo, tabela)
-      }, 100000);
+      console.log("Error");
       return;
     }
   });
