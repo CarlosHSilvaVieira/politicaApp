@@ -36,7 +36,7 @@ exports.coletaTweetsSenadores = function (req, res)
 
   if(senadores.length > 0)
   {
-    senadores.forEach(function (iteem, index)
+    senadores.forEach(function (item, index)
     {
       getTweets(item, 'senador', 'tweets_senadores');
       res.status(200).send({"status": "200", "data": "coleta realizada"});
