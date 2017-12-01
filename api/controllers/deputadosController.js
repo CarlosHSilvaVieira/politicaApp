@@ -1,107 +1,140 @@
 var model = require('../models/deputadosModel.js');
-const http = require('ajax-request');
-
-var request = {
-   url : "http://www.sentiment140.com/api/bulkClassifyJson",
-   headers: {
-     "Accept" : "application/json",
-     "Content-Type" : "application/json"
-   },
-   data:
-   {
-     language: "es",
-     data: []
-   }
- };
 
 exports.getDeputado = function (req, res)
 {
-  var d = model.getDeputado(req.params.nomeDepuatdo);
-  res.send(200, JSON.stringify(d));
+  var response = {status: 200};
+  var deputado = model.getDeputado(req.params.nomeDepuatdo);
+  if(deputado.length > 0)
+  {
+    response.data = deputado[0];
+  }
+  else
+  {
+    response.status = 500;
+    response.data = "deputado não encontrado";
+  }
+  res.status(200).send(JSON.stringify(response));
 }
 
 exports.getAllDeputados = function (req, res)
 {
-  res.send(200, JSON.stringify(model.getDeputados()));
-}
+  var deputados = model.getDeputados();
+  var response = {status: 200};
 
-exports.analiseSentimeno = function (req, res)
-{
-  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo);
-
-  if(typeof id_parlamentar[0] !== "undefined")
+  if(deputados.length > 0)
   {
-    var tweets = model.getTweetsDeputado(id_parlamentar[0].id);
-    var resposta = {total: 0, positivos: 0, negativos: 0, neutros: 0, porcentagem_positivos: 0, porcentagem_negativos: 0, porcentagem_neutros: 0};
-
-    if(tweets.length > 0)
+    response.data = [];
+    deputados.forEach(function (deputado, index)
     {
-      tweets.forEach(function(item, index)
-      {
-        request.data.data.push({text: item.texto});
-      });
-
-      resposta.total = request.data.data.length;
-
-      http.post(request, function(e, r, body)
-      {
-        //se a requisição retornar um erro
-        if(e){res.send(500, {error: e});}
-
-        var serverResponse = JSON.parse(body);
-
-        serverResponse.data.forEach(function(item, index)
-        {
-          if(item.polarity == 4)
-          {
-            resposta.positivos++;
-          }
-          else if(item.polarity == 2)
-          {
-            resposta.neutros++;
-          }
-          else
-          {
-            resposta.negativos++;
-          }
-
-        });
-
-        resposta.porcentagem_negativos = (resposta.negativos * 100) / resposta.total;
-        resposta.porcentagem_positivos = (resposta.positivos * 100) / resposta.total;
-        resposta.porcentagem_neutros = (resposta.neutros * 100) / resposta.total;
-
-        //se estiver tudo de boas
-        res.status(200).send(JSON.stringify(resposta));
-      });
-    }
-    else
-    {
-      res.send(200, JSON.stringify({data: "deputado sem tweets"}));
-    }
+      response.data.push(deputado)
+    });
   }
   else
   {
-    res.send(200, JSON.stringify({data: "deputado não encontrado"}));
+    response.status = 500;
+    response.data = "deputados não encontrados";
   }
+
+  res.status(200).send(JSON.stringify(response));
 }
+
+exports.analiseSentimento = function (req, res)
+{
+  var polaridades = model.getPolaridade(req.params.nomeDepuatdo);
+  var resposta = {total: 0, positivos: 0, negativos: 0, neutros: 0, porcentagem_positivos: 0, porcentagem_negativos: 0, porcentagem_neutros: 0};
+
+  if(polaridades.length > 0)
+  {
+    resposta = realizaAnalise(polaridades);
+  }
+  else
+  {
+    resposta.status = 500;
+  }
+  res.status(200).send(JSON.stringify(resposta));
+}
+
+var realizaAnalise = function (polaridades)
+{
+  var resposta = {total: 0, positivos: 0, negativos: 0, neutros: 0, porcentagem_positivos: 0, porcentagem_negativos: 0, porcentagem_neutros: 0};
+  polaridades.forEach(function (objeto, index)
+  {
+    if(objeto.polaridade == 4)
+    {
+      resposta.positivos++;
+    }
+    else if(objeto.polaridade == 2)
+    {
+      resposta.neutros++;
+    }
+    else if(objeto.polaridade == 0)
+    {
+      resposta.negativos++;
+    }
+  });
+
+  resposta.status = 200;
+  resposta.total = polaridades.length;
+  resposta.porcentagem_negativos = (resposta.negativos * 100) / resposta.total;
+  resposta.porcentagem_positivos = (resposta.positivos * 100) / resposta.total;
+  resposta.porcentagem_neutros = (resposta.neutros * 100) / resposta.total;
+  return resposta;
+}
+
+exports.rank = function (req, res)
+{
+  var deputados = model.DeputadosQuantTweets(req.params.quant);
+  var response = {status: 200, data: []}
+  if(deputados.length > 0)
+  {
+    var analise = [];
+    deputados.forEach(function (deputado, index)
+    {
+      var polaridades = model.getPolaridadeByID(deputado.id);
+      var resultado = realizaAnalise(polaridades);
+      resultado.nome = deputado.nome;
+      resultado.id_parlamentar = deputado.id;
+      analise.push(resultado);
+    });
+
+    analise.sort(ordernar);
+    response.data = analise;
+  }
+  else
+  {
+    response.status = 500;
+  }
+  res.status(200).send(response);
+};
+
+var ordernar = function (A, B) {
+  if(A.porcentagem_positivos > B.porcentagem_positivos)
+  {
+    return 1;
+  }
+  else if (A.porcentagem_positivos < B.porcentagem_positivos)
+  {
+    return -1;
+  }
+  else
+  {
+    return 0;
+  }
+};
 
 exports.getTweets = function (req, res)
 {
-  var id_parlamentar = model.getDeputado(req.params.nomeDepuatdo);
-
-  if(typeof id_parlamentar[0] !== "undefined")
+  var id_parlamentar = model.getDeputado(req.params.nomeDeputado);
+  if (typeof id_parlamentar[0] !== "undefined")
   {
     var tweets = model.getTweetsDeputado(id_parlamentar[0].id);
-    if(typeof tweets[0] !== "undefined")
+    if (typeof tweets[0] !== "undefined")
     {
-      res.send(200, JSON.stringify(tweets));
+      res.send(200, JSON.stringify({status: 200, data: tweets}));
+    } else {
+      res.send(200, JSON.stringify({status: 500, data: "deputado sem tweets"}));
     }
-    else {
-      res.send(200, JSON.stringify({data: "deputado sem tweets"}));
-    }
-  }
-  else {
-    res.send(200, JSON.stringify({data: "deputado não encontrado"}));
+  } else {
+    res.send(200, JSON.stringify({status: 500, data: "deputado não encontrado"}));
   }
 }

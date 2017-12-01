@@ -7,8 +7,11 @@ module.exports = function (app)
   app.route('/senadores')
   .get(senadoresController.getAllSenadores);
 
+  app.route('/senadores/rank/:quant')
+  .get(senadoresController.rank);
+
   app.route('/senador/analise/:nomeSenador')
-  .get(senadoresController.analiseSentimeno);
+  .get(senadoresController.analiseSentimento);
 
   app.route('/senador/tweets/:nomeSenador')
   .get(senadoresController.getTweets);

@@ -1,10 +1,10 @@
-const model = require('../models/coletorModel.js');
 const http = require('ajax-request');
 const Twitter = require ('twitter');
 const processador = require('../models/processador/processador.js');
 const senadoresModel = require('../models/senadoresModel.js');
 const deputadosModel = require('../models/deputadosModel.js');
 const translate = require('translate');
+const connection = require('../models/connectionAsync');
 
 var twitter = new Twitter({
   "consumer_key": "KZ9EgTXuqZK1xOJ6stuoxnuVC",
@@ -18,89 +18,100 @@ translate.key = "trnsl.1.1.20171130T112512Z.a54b5194be5a4d4c.79415c6da36fb3451c4
 
 exports.coletaTweetsSenador = function (req, res)
 {
-  var d = model.coletaTweetsSenador(req.params.nomeSenador);
-  if(d == true)
+  var s = senadoresModel.getSenador(req.params.nomeSenador);
+  if(s.length > 0)
   {
-    res.send(200, {texto: "coleta realizada"});
+    getTweets(s[0], "senador", "tweets_senadores");
+    res.status(200).send({"status": "200", "data": "coleta realizada"});
   }
   else
   {
-    res.send(200, {texto: "coleta não pode ser realizada"});
+    res.status(200).send({"status": "500", "data": "a coleta não pode ser realizada"});
   }
 }
 
 exports.coletaTweetsSenadores = function (req, res)
 {
-  var d = model.coletaTweetsSenadores();
-  if(d == true)
+  var senadores = senadoresModel.getSenadores();
+
+  if(senadores.length > 0)
   {
-    res.send(200, {texto: "coleta realizada"});
+    senadores.forEach(function (iteem, index)
+    {
+      getTweets(item, 'senador', 'tweets_senadores');
+      res.status(200).send({"status": "200", "data": "coleta realizada"});
+    });
   }
   else
   {
-    res.send(200, {texto: "coleta não pode ser realizada"});
+    res.status(200).send({"status": "500", "data": "a coleta não pode ser realizada"});
   }
 }
 
 exports.coletaTweetsDeputados = function (req, res)
 {
-  var deputado = deputadosModel.getDeputado(nomeDepuatdo);
+  var deputados = deputadosModel.getDeputados();
 
-  if(typeof deputado[0] !== 'undefined')
+  if(deputados.length > 0)
   {
-    getTweets(deputado[0], 'deputado', true, 'tweets_deputados');
-    getTweets(deputado[0], 'deputado', false, 'tweets_deputados');
-  }
-
-  if(d == true)
-  {
-    res.send(200, {texto: "coleta realizada"});
+    deputados.forEach(function (iteem, index)
+    {
+      getTweets(item, 'deputado', 'tweets_deputados');
+      res.status(200).send({"status": "200", "data": "coleta realizada"});
+    });
   }
   else
   {
-    res.send(200, {texto: "coleta não pode ser realizada"});
+    res.status(200).send({"status": "500", "data": "a coleta não pode ser realizada"});
   }
 }
 
 exports.coletaTweetsDeputado = function (req, res)
 {
-  /*var d = deputadosModel.getDeputado(req.params.nomeDeputado);
+  var d = deputadosModel.getDeputado(req.params.nomeDeputado);
   if(d.length > 0)
   {
-    getTweets(d[0], "deputado", false, "tweets_deputados");
+    getTweets(d[0], "deputado", "tweets_deputados");
     res.status(200).send({"status": "200", "data": "coleta realizada"});
   }
   else
   {
-    res.status(500).send({"status": "500", "data": "a coleta não pode ser realizada"});
-  }*/
-  analiseSentimeno('fodas o mundo')
-  res.status(200).send({data: "ok"});
+    res.status(200).send({"status": "500", "data": "a coleta não pode ser realizada"});
+  }
 }
 
 exports.coletaTweetsDeputadosSemTweets = function(req, res)
 {
-  var d = model.coletaTweetsDeputadosSemTweets();
-  if(d > 0)
+  var deputados = deputadosModel.getDeputadosSemTweets();
+  if(deputados.length > 0)
   {
-    res.send(200, {texto: "coleta realizada " + d + " deputados ainda sem tweets"});
+    deputados.forEach(function (deputado, index)
+    {
+      getTweets(deputado, "deputado", "tweets_deputados");
+    });
+
+    res.status(200).send({"status": "200", "texto": "coleta realizada " + deputados.length + " deputados ainda sem tweets"});
   }
   else
   {
-    res.send(200, {texto: "coleta não pode ser realizada"});
+    res.status(200).send({"status": "500", "data": "a coleta não pode ser realizada"});
   }
 }
 
 exports.coletaTweetsSenadoresSemTweets = function(req, res)
 {
-  var d = model.coletaTweetsSenadoresSemTweets();
-  if(d > 0)
+  var senadores = senadoresModel.getSenadoresSemTweets();
+  if(senadores.length > 0)
   {
-    res.send(200, {texto: "coleta realizada " + d + " senadores ainda sem tweets"});
+    senadores.forEach(function (senador, index)
+    {
+      getTweets(senador, "senador", "tweets_senadores");
+    });
+    res.status(200).send({"status": "200", "texto": "coleta realizada " + senadores.length + " deputados ainda sem tweets"});
   }
   else
   {
-    res.send(200, {texto: "coleta não pode ser realizada"});
+    res.status(200).send({"status": "500", "data": "a coleta não pode ser realizada"});
   }
 }
 
@@ -108,8 +119,6 @@ async function analiseSentimeno (tabela, id, texto)
 {
   if(typeof texto !== "undefined")
   {
-    var a = await traduzir('pt', 'en', texto)
-
     var request = {
        url : "http://www.sentiment140.com/api/bulkClassifyJson",
        headers: {
@@ -118,23 +127,27 @@ async function analiseSentimeno (tabela, id, texto)
        }
      };
 
+    var texto_traduzido = await traduzir('pt', 'en', texto);
     request.data = {data: []};
-    request.data.data.push({text: a});
+    request.data.data.push({text: texto_traduzido});
 
+    //var classificacao = processador.classify(texto);
+    //processador.salvarParaTreino(texto, classificacao, 'learning');
+    console.log(request.data.data);
     http.post(request, function(e, r, body)
     {
       //se a requisição retornar um erro
       if(e){return e;}
-      salvar(tabela, id, texto, JSON.parse(body).data[0].polarity);
+      //senão
+      salvar(tabela, id, texto_traduzido, JSON.parse(body).data[0].polarity);
     });
   }
 }
 
-function salvar(id, tabela, texto, polarity)
+async function salvar(tabela, id, texto, polarity)
 {
-  var query = "insert into "+tabela+" (id_parlamentar, texto, polarity) values  ("+id+ ", '"+texto+"', "+polarity+");";
-  console.log(query);
-  connection.query(query, function(err, responde){});
+  var query = "insert into "+tabela+" (id_parlamentar, texto, polaridade) values  ("+id+ ", '"+texto+"', "+polarity+");";
+  connection.query(query, function(e, response){if(e){return;}});
 }
 
 async function traduzir(origem, destino, texto)
@@ -143,14 +156,14 @@ async function traduzir(origem, destino, texto)
    return resultado;
 }
 
-function getTweets(parlamentar, cargo, direcionado, tabela)
+async function getTweets(parlamentar, cargo, tabela)
 {
   var count = 0;
   var params = {q: '', count: 30, result_type: 'recent', lang: 'pt'};
 
-  if(direcionado == true){cargo = "to:";}
-
   params.q = cargo + ' ' + parlamentar.nome.toLowerCase().trim() + ' -filter:retweets';
+
+  console.log("Coletando Tweets sobre "+ cargo + " - "+ parlamentar.nome + "... \n");
 
   twitter.get('search/tweets', params, function(error, tweets, response)
   {
@@ -160,31 +173,14 @@ function getTweets(parlamentar, cargo, direcionado, tabela)
         {
           var texto = tweet.text;
           var exp = /(\b(https?|ftp|file):\/\/)([-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/i;
-          texto = texto.replace(exp, "");
-
-          texto = traduzir('pt', 'en', texto);
-
-          if(typeof texto !== "undefined")
-          {
-            var classificacao = processador.classify(texto);
-            processador.salvarParaTreino(texto, classificacao, 'learning');
-
-            if(classificacao == true)
-            {
-              analiseSentimeno(tabela, parlamentar.id, texto);
-            }
-            else
-            {
-              console.log("texto regeitado");
-            }
-          }
-
+          texto = texto.replace(exp, " ");
+          analiseSentimeno(tabela, parlamentar.id, texto);
         });
     }
     else
     {
-      setTimeout(getTweets(parlamentar, cargo, direcionado, tabela), 100000);
-      console.log("Limite de requisiões excedido ");
+      console.log("Limite de requisiões excedido execucão re-agendada para daqui a dex minutos");
+      setTimeout(getTweets(parlamentar, cargo, tabela), 100000);
       return;
     }
   });

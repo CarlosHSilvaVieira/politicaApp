@@ -13,7 +13,7 @@ module.exports.train = function ()
 
 module.exports.salvarParaTreino = function(texto, resultado, local)
 {
-  var query = "insert into "+ local + " (texto, resultado) values ('"+texto+"', '"+resultado+"')";
+  var query = "insert into "+ local + " (texto, resultado) values ('"+texto+"', "+resultado+")";
   connection.query(query);
 }
 

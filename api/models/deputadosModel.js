@@ -35,3 +35,31 @@ module.exports.getTweetsDeputado = function (id_parlamentar)
 	var resultado = connection.query(query);
 	return resultado;
 }
+
+module.exports.getID = function(nome) {
+	var query = "select id from deputados where nome = '"+ nome.toLowerCase() + "'";
+	var resultado = connection.query(query);
+	return resultado;
+}
+
+module.exports.getPolaridade = function (nome)
+{
+	var parlamentar = this.getID(nome);
+	var query = "select polaridade from tweets_deputados where id_parlamentar = "+ parlamentar[0].id + "";
+	var resultado = connection.query(query);
+	return resultado;
+}
+
+module.exports.getPolaridadeByID = function (id)
+{
+	var query = "select polaridade from tweets_deputados where id_parlamentar = "+ id + "";
+	var resultado = connection.query(query);
+	return resultado;
+}
+
+module.exports.DeputadosQuantTweets = function(quant)
+{
+	var query = "select id, nome from deputados AS D inner join tweets_deputados AS TD on (D.id = TD.id_parlamentar) having count(TD.id_parlamentar) >= "+ quant;
+	var resultado = connection.query(query);
+	return resultado;
+}
