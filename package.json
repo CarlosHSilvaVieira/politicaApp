@@ -21,6 +21,7 @@
     "mysql": "^2.15.0",
     "nodemon": "^1.12.1",
     "sync-mysql": "^3.0.1",
+    "translate": "^1.0.0",
     "twitter": "^1.7.1"
   }
 }
