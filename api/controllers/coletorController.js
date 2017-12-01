@@ -128,19 +128,23 @@ async function analiseSentimeno (tabela, id, texto)
      };
 
     var texto_traduzido = await traduzir('pt', 'en', texto);
-    request.data = {data: []};
-    request.data.data.push({text: texto_traduzido});
 
-    //var classificacao = processador.classify(texto);
-    //processador.salvarParaTreino(texto, classificacao, 'learning');
-    console.log(request.data.data);
-    http.post(request, function(e, r, body)
+    if(texto_traduzido !== "")
     {
-      //se a requisição retornar um erro
-      if(e){return e;}
-      //senão
-      salvar(tabela, id, texto_traduzido, JSON.parse(body).data[0].polarity);
-    });
+      request.data = {data: []};
+      request.data.data.push({text: texto_traduzido});
+
+      //var classificacao = processador.classify(texto);
+      //processador.salvarParaTreino(texto, classificacao, 'learning');
+      console.log(request.data.data);
+      http.post(request, function(e, r, body)
+      {
+        //se a requisição retornar um erro
+        if(e){return e;}
+        //senão
+        salvar(tabela, id, texto_traduzido, JSON.parse(body).data[0].polarity);
+      });
+    }
   }
 }
 
@@ -152,7 +156,8 @@ async function salvar(tabela, id, texto, polarity)
 
 async function traduzir(origem, destino, texto)
 {
-   var resultado = await translate(texto, {from: origem, to: destino});
+   var resultado = "";
+   resultado = await translate(texto, {from: origem, to: destino});
    return resultado;
 }
 
@@ -179,8 +184,10 @@ async function getTweets(parlamentar, cargo, tabela)
     }
     else
     {
-      console.log("Limite de requisiões excedido execucão re-agendada para daqui a dex minutos");
-      setTimeout(getTweets(parlamentar, cargo, tabela), 100000);
+      console.log("Limite de requisiões excedido execucão re-agendada para daqui a dez minutos");
+      setTimeout(function () {
+        getTweets(parlamentar, cargo, tabela)
+      }, 100000);
       return;
     }
   });
