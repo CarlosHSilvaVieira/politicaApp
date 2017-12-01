@@ -16,8 +16,11 @@ module.exports = function (app)
   app.route('/deputados')
   .get(deputadosController.getAllDeputados);
 
+  app.route('/deputados/rank/:quant')
+  .get(deputadosController.rank);
+
   app.route('/deputado/analise/:nomeDepuatdo')
-  .get(deputadosController.analiseSentimeno);
+  .get(deputadosController.analiseSentimento);
 
   app.route('/deputado/tweets/:nomeDepuatdo')
   .get(deputadosController.getTweets);
